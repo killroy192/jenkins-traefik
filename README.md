@@ -1,6 +1,6 @@
 # Bootstrap for Jenkins
 
-Unofficial bootstrap for running your own [Jenkins](https://sentry.io/) with [Docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/).
+Unofficial bootstrap for running your own [Jenkins](https://jenkins.io/) with [Docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/).
 
 ## Requirements
 
