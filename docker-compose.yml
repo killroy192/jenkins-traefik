@@ -1,0 +1,32 @@
+version: '3.4'
+
+x-defaults: &defaults
+  restart: unless-stopped
+  image: jenkins/jenkins:lts
+  env_file: ./config/env/jenkins.env
+  volumes:
+    - jenkins-home:/var/jenkins_home
+
+services:
+  web:
+    <<: *defaults
+    ports:
+      - '${PORT}:8080'
+    networks: 
+      - default
+      - traefik-net
+    labels:
+      - "traefik.docker.network=${TRAEFIK_NETWORK}"
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:${FRONTEND_HOST}"
+      - "traefik.port=${PORT}"
+      - "traefik.protocol=http"
+      - "traefik.entryPoints=https"
+
+volumes:
+    jenkins-home:
+      external: true
+networks: 
+  traefik-net:
+    external:
+      name: ${TRAEFIK_NETWORK}
