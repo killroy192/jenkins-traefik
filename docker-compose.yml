@@ -11,22 +11,20 @@ services:
   web:
     <<: *defaults
     ports:
-      - '${PORT}:8080'
+      - ${PORT}:8080
     networks: 
       - default
-      - traefik-net
+      - traefik
     labels:
-      - "traefik.docker.network=${TRAEFIK_NETWORK}"
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${FRONTEND_HOST}"
-      - "traefik.port=${PORT}"
-      - "traefik.protocol=http"
-      - "traefik.entryPoints=https"
-
+      - traefik.enable=true
+      - traefik.http.routers.my-app.rule=Host(`${HOST}`)
+      - traefik.http.services.my-app.loadbalancer.server.port=${PORT}
+      - traefik.http.routers.my-app.entrypoints=websecure
+      - traefik.http.routers.my-app.tls=true
+      - traefik.http.routers.my-app.tls.certresolver=leresolver
 volumes:
-    jenkins-home:
-      external: true
+  jenkins-home:
 networks: 
-  traefik-net:
+  traefik:
     external:
       name: ${TRAEFIK_NETWORK}
