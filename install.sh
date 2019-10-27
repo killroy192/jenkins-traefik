@@ -52,6 +52,11 @@ make_env $ENV_FILE
 echo ""
 
 echo ""
+echo "Creating volumes for persistent storage..."
+echo "Created $(docker volume create --name=jenkins-home)."
+echo ""
+
+echo ""
 echo "Building and tagging Docker images..."
 echo ""
 docker-compose build

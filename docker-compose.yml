@@ -5,10 +5,10 @@ services:
     restart: unless-stopped
     image: jenkins/jenkins:lts
     env_file: ./config/env/jenkins.env
+    environment:
+      - JENKINS_OPTS="--httpPort=${PORT}"
     volumes:
       - jenkins-home:/var/jenkins_home
-    ports:
-      - ${PORT}:8080
     networks: 
       - default
       - traefik
@@ -17,19 +17,20 @@ services:
       # set up middleware
       - traefik.http.middlewares.to-https.redirectscheme.scheme=https
       # services
-      - traefik.http.services.web-https.loadbalancer.server.port=${PORT}
-      - traefik.http.services.web-http.loadbalancer.server.port=${PORT}
+      - traefik.http.services.port-forward.loadbalancer.server.port=${PORT}
       # routes for http
       - traefik.http.routers.web-http.entrypoints=${HTTP_ENDPOINT}
       - traefik.http.routers.web-http.rule=Host(`${HOST}`)
-      - traefik.http.routers.web-http.middlewares=to-https@docker"
+      - traefik.http.routers.web-http.middlewares=to-https@docker
       # routes for https
+      - traefik.http.routers.web-https.service=port-forward
       - traefik.http.routers.web-https.entrypoints={HTTPS_ENDPOINT}
       - traefik.http.routers.web-https.rule=Host(`${HOST}`)
       - traefik.http.routers.web-https.tls=true
       - traefik.http.routers.web-https.tls.certresolver=default
 volumes:
   jenkins-home:
+    external: true
 networks: 
   traefik:
     external:
