@@ -1,15 +1,12 @@
 version: '3.4'
 
-x-defaults: &defaults
-  restart: unless-stopped
-  image: jenkins/jenkins:lts
-  env_file: ./config/env/jenkins.env
-  volumes:
-    - jenkins-home:/var/jenkins_home
-
 services:
   web:
-    <<: *defaults
+    restart: unless-stopped
+    image: jenkins/jenkins:lts
+    env_file: ./config/env/jenkins.env
+    volumes:
+      - jenkins-home:/var/jenkins_home
     ports:
       - ${PORT}:8080
     networks: 
@@ -17,11 +14,20 @@ services:
       - traefik
     labels:
       - traefik.enable=true
-      - traefik.http.routers.my-app.rule=Host(`${HOST}`)
-      - traefik.http.services.my-app.loadbalancer.server.port=${PORT}
-      - traefik.http.routers.my-app.entrypoints=websecure
-      - traefik.http.routers.my-app.tls=true
-      - traefik.http.routers.my-app.tls.certresolver=leresolver
+      # set up middleware
+      - traefik.http.middlewares.to-https.redirectscheme.scheme=https
+      # services
+      - traefik.http.services.web-https.loadbalancer.server.port=${PORT}
+      - traefik.http.services.web-http.loadbalancer.server.port=${PORT}
+      # routes for http
+      - traefik.http.routers.web-http.entrypoints=${HTTP_ENDPOINT}
+      - traefik.http.routers.web-http.rule=Host(`${HOST}`)
+      - traefik.http.routers.web-http.middlewares=to-https@docker"
+      # routes for https
+      - traefik.http.routers.web-https.entrypoints={HTTPS_ENDPOINT}
+      - traefik.http.routers.web-https.rule=Host(`${HOST}`)
+      - traefik.http.routers.web-https.tls=true
+      - traefik.http.routers.web-https.tls.certresolver=default
 volumes:
   jenkins-home:
 networks: 
